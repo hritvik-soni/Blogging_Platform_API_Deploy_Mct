@@ -24,34 +24,35 @@ The Controller layer handles the incoming HTTP requests and manages the routing 
 - Comment creation and retrieval
 ## Endpoints
 ### User Endpoints:
-- **POST /api/users -** Create a new user.
-- **GET /api/users/{id} -** Get user details by ID.
-- **GET /api/users?username={username} -** Get user details by username.
-- **PUT /api/users/{id} -** Update user details by ID.
-- **DELETE /api/users/{id} -** Delete user by ID.
+- **POST /api/users/create -** Create a new user.
+- **GET /api/users/{userId} -** Get user details by ID.
+- **GET /api/users/all -** Get all user details.
+- **PUT /api/users/{username} -** Update user details by Username.
+- **DELETE /api/users/delete -** Delete user by Username.
 
 ### Post Endpoints:
-- **POST /api/posts -** Create a new post.
-- **GET /api/posts/{id} -** Get post details by ID.
-- **PUT /api/posts/{id} -** Update post details by ID.
-- **DELETE /api/posts/{id} -** Delete post by ID.
-- **GET /api/posts?userId={userId} -** Get posts by user ID.
+- **POST /api/posts/create -** Create a new post.
+- **GET /api/posts/allpostofusers -** Get post details by ID.
+- **PUT /api/posts/update -** Update post details by ID.
+- **DELETE /api/posts/delete-** Delete post by ID.
+
 
 ### Follow Endpoints:
-- **POST /api/follows -** Add a follower.
-- **GET /api/follows/followers/{userId} -** Get followers of a user.
-- **GET /api/follows/followings/{userId} -** Get followings of a user.
+- **POST /api/follows/create -** Add a follower.
+- **GET /api/follows/followers -** Get followers of a user.
+- **GET /api/follows/followings -** Get followings of a user.
 
 ### Comment Endpoints:
 - **POST /api/comments -** Add a comment to a post.
-- **GET /api/comments/{userId}/{postId} -** Get comments of a post by user ID and post ID.
+- **GET /api/comments/getcomments/{userId}/{postId} -** Get comments of a post by user ID and post ID.
+- **DELETE /api/comments/delete -** delete comments of a post by commentId
 
 ## Services
 The Services layer contains the business logic of the application. It acts as an intermediary between the controllers and the repositories, implementing the necessary operations and transformations on the data. The services handle operations such as:
 - User management (creation, retrieval, update, deletion)
 - Post management (creation, retrieval, update)
-- Follow management (adding followers, retrieving followers, retrieving followed users)
-- Comment management (adding comments, retrieving comments)
+- Follow management (adding followers, retrieving followers, retrieving followed users, unfollow)
+- Comment management (adding comments, retrieving comments, deletion)
 
 ## Repository
 The Repository layer is responsible for interacting with the underlying database. It provides an abstraction over the database operations, allowing the services to query and manipulate the data. Some of the key responsibilities of the repositories include:
@@ -72,4 +73,4 @@ The database design for the Blogging Platform API follows the object-relational 
 The Blogger Web Application is a full-stack web application that allows users to create, read, update, and delete blog posts and comments. It also allows users to follow other users and view their blog posts. The application uses Spring Boot, Spring MVC, and Spring Data JPA to implement the backend, and MySQL for the database. Swagger is used for API documentation.
 
 Deployment
-The application has been deployed on an AWS EC2 instance, and can be accessed using the following URL: http://localhost:8080/swagger-ui/index.html#.
+The application has been deployed on an AWS EC2 instance, and can be accessed using the following URL: http://3.110.118.100:8080/swagger-ui/index.html
