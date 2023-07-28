@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Optional;
 
 @Data
@@ -16,5 +17,5 @@ public class PostResponse {
 
     private String responseCode;
     private String responseMessage;
-    private Optional<Post> post;
+    private List<Post> post;
 }

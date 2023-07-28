@@ -10,10 +10,16 @@ import com.hritvik.BloggingPlatformAPI.repository.IUserRepository;
 import com.hritvik.BloggingPlatformAPI.service.utility.AccountUtils;
 import com.hritvik.BloggingPlatformAPI.service.utility.PasswordEncrypter;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -62,39 +68,60 @@ public class PostService {
                 .responseMessage(AccountUtils.ACCOUNT_INVALID_CREDENTIALS_MESSAGE)
                 .build();
     }
-
-    public PostResponse getPostbyId(Long postId) {
-
-        if(postRepository.findById(postId).isPresent()){
-
-            Optional<Post> getPost= postRepository.findById(postId);
-            return PostResponse.builder()
-                    .responseCode("010")
-                    .responseMessage("Your Post")
-                    .post(getPost)
-                    .build();
+    public List<Post> getAllPostOfUser(Long userId) {
+        List<Post> existingPosts = new ArrayList<>();
+        for (Post post : postRepository.findAll()) {
+            if (Objects.equals(post.getUser().getUserId(), userId)) {
+                existingPosts.add(post);
+            }
         }
-        return PostResponse.builder()
-                .responseCode("011")
-                .responseMessage( "Post not found for Post id: "+ postId)
-                .post(Optional.empty())
-                .build();
-
+        if (existingPosts.size() == 0) {
+            return null;
+        }
+        return existingPosts.stream().toList();
     }
 
-    public PostResponse updatePost(String userName, String password,Long postId, String postTitle) throws NoSuchAlgorithmException {
+
+    public ResponseEntity<List<String>> getPostsByUserId(String userName) {
+
+        User existingUser = userRepository.findByUserName(userName);
+        Long userId= existingUser.getUserId();
+
+        if (!userRepository.findById(userId).isPresent()) {
+            return new ResponseEntity<>(List.of("User with userId " + userId + " doesn't exist"), HttpStatus.NOT_FOUND);
+        }
+
+
+
+        if (getAllPostOfUser(userId) == null) {
+            return new ResponseEntity<>(List.of("User with userId " + userId + " haven't posted any post"), HttpStatus.FOUND);
+        }
+
+        List<Post> allPosts = postRepository.findAll();
+        List<String> postBody = new ArrayList<>();
+        for (Post post : allPosts) {
+            if(post.getUser().getUserId().equals(userId)) {
+                postBody.add(post.getPostBody());
+            }
+        }
+        return new ResponseEntity<>(postBody, HttpStatus.FOUND);
+    }
+
+
+    public BlogResponse updatePost(String userName, String password,Long postId, String postTitle) throws NoSuchAlgorithmException {
 
         Post post  = postRepository.findById(postId).orElse(null);
         User user = userRepository.findByUserName(userName);
 
         if(user== null){
-            return PostResponse.builder()
+            return BlogResponse.builder()
                     .responseCode(AccountUtils.ACCOUNT_NOT_EXIST_CODE)
                     .responseMessage(AccountUtils.ACCOUNT_NOT_EXIST_MESSAGE)
+
                     .build();
         }
         if(post== null){
-            return PostResponse.builder()
+            return BlogResponse.builder()
                     .responseCode("012")
                     .responseMessage("Post Doesn't NOt Exist")
                     .build();
@@ -108,17 +135,14 @@ public class PostService {
             post.setPostTitle(postTitle);
             postRepository.save(post);
 
-            Optional<Post> newPost= Optional.of(post);
-
-            return  PostResponse.builder()
+            return  BlogResponse.builder()
                     .responseCode("013")
                     .responseMessage("Your Post Updated Successfully")
-                    .post(newPost)
                     .build();
 
         }
 
-        return PostResponse.builder()
+        return BlogResponse.builder()
                 .responseCode(AccountUtils.ACCOUNT_INVALID_CREDENTIALS_CODE)
                 .responseMessage(AccountUtils.ACCOUNT_INVALID_CREDENTIALS_MESSAGE)
                 .build();

@@ -3,7 +3,7 @@ package com.hritvik.BloggingPlatformAPI.service;
 import com.hritvik.BloggingPlatformAPI.model.Follow;
 import com.hritvik.BloggingPlatformAPI.model.User;
 import com.hritvik.BloggingPlatformAPI.model.dto.BlogResponse;
-import com.hritvik.BloggingPlatformAPI.model.dto.FollowResponse;
+
 import com.hritvik.BloggingPlatformAPI.repository.IFollowRepository;
 import com.hritvik.BloggingPlatformAPI.repository.IUserRepository;
 import com.hritvik.BloggingPlatformAPI.service.utility.AccountUtils;
@@ -24,7 +24,6 @@ public class FollowService {
     @Autowired
     IUserRepository userRepository;
 
-    private List<Follow> allFollows = new ArrayList<>();
     public BlogResponse createFollow(String userName, String password, String followUseName) throws NoSuchAlgorithmException {
 
         User followUser = userRepository.findByUserName(followUseName);
@@ -70,87 +69,59 @@ public class FollowService {
     }
 
 
-    public FollowResponse getAllFollowings(String userName, String password) throws NoSuchAlgorithmException {
+    public List<String> getAllFollowings(String userName, String password) throws NoSuchAlgorithmException {
 
         User existingUser = userRepository.findByUserName(userName);
 
         if(existingUser== null){
-            return FollowResponse.builder()
-                    .responseCode(AccountUtils.ACCOUNT_NOT_EXIST_CODE)
-                    .responseMessage(AccountUtils.ACCOUNT_NOT_EXIST_MESSAGE)
-                    .build();
+            return List.of("User Not Found!!!!!");
         }
 
         String encryptedPassword = PasswordEncrypter.encryptPassword(password);
 
         if(encryptedPassword.equals(existingUser.getPassword())){
 
-         List<String> userNameList = new ArrayList<String>();
-
             Set<String> following=new HashSet<>();
-            for (Follow follow : allFollows) {
-                if (Objects.equals(follow.getFollowerId().getUserId(), existingUser.getUserId())) {
+            for (Follow follow : followRepository.findAll()) {
+                if (follow.getFollowerId().getUserId().equals(existingUser.getUserId())) {
                     following.add(follow.getFollowingId().getUserName());
                 }
             }
             if(following.size()==0){
-                return null;
+                return List.of(userName +"  You are not Following any one " );
             }
-            return  FollowResponse.builder()
-                    .responseCode("016")
-                    .responseMessage("Your followings")
-                    .followUserNames(new ArrayList<>(following))
-                    .build();
-
+            return new ArrayList<>(following);
         }
 
-        return FollowResponse.builder()
-                .responseCode(AccountUtils.ACCOUNT_INVALID_CREDENTIALS_CODE)
-                .responseMessage(AccountUtils.ACCOUNT_INVALID_CREDENTIALS_MESSAGE)
-                .build();
+        return List.of("Invalid Credentials!!!!!!!!!!");
 
 
     }
 
-    public FollowResponse getAllFollowers(String userName, String password) throws NoSuchAlgorithmException {
+    public List<String> getAllFollowers(String userName, String password) throws NoSuchAlgorithmException {
 
         User existingUser = userRepository.findByUserName(userName);
 
         if(existingUser== null){
-            return FollowResponse.builder()
-                    .responseCode(AccountUtils.ACCOUNT_NOT_EXIST_CODE)
-                    .responseMessage(AccountUtils.ACCOUNT_NOT_EXIST_MESSAGE)
-                    .build();
+            return List.of("User Not Found!!!!!");
         }
 
         String encryptedPassword = PasswordEncrypter.encryptPassword(password);
 
-        if(encryptedPassword.equals(existingUser.getPassword())){
+        if(encryptedPassword.equals(existingUser.getPassword())) {
 
-            Set<String> follower=new HashSet<>();
-            for (Follow follow : allFollows) {
-                if (Objects.equals(follow.getFollowingId().getUserId(), existingUser.getUserId())) {
+            Set<String> follower = new HashSet<>();
+            for (Follow follow : followRepository.findAll()) {
+                if (follow.getFollowingId().getUserId().equals( existingUser.getUserId())) {
                     follower.add(follow.getFollowerId().getUserName());
                 }
             }
-            if(follower.size()==0){
-                return null;
+            if (follower.size() == 0) {
+                return List.of("No Followers for this user: " + userName);
             }
-
-            return  FollowResponse.builder()
-                    .responseCode("017")
-                    .responseMessage("Your Followers")
-                    .followUserNames(new ArrayList<>(follower))
-                    .build();
-
+            return new ArrayList<>(follower);
         }
-
-        return FollowResponse.builder()
-                .responseCode(AccountUtils.ACCOUNT_INVALID_CREDENTIALS_CODE)
-                .responseMessage(AccountUtils.ACCOUNT_INVALID_CREDENTIALS_MESSAGE)
-                .build();
-
-
+      return List.of("Invalid Credentials!!!!!!!!!!");
     }
 
     public Follow findFollow(Long followId) {
@@ -199,3 +170,4 @@ public class FollowService {
                 .build();
     }
 }
+

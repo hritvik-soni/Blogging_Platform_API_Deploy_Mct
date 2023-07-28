@@ -6,6 +6,7 @@ import com.hritvik.BloggingPlatformAPI.model.dto.PostRequest;
 import com.hritvik.BloggingPlatformAPI.model.dto.PostResponse;
 import com.hritvik.BloggingPlatformAPI.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.NoSuchAlgorithmException;
@@ -24,18 +25,14 @@ public class PostController {
       return postService.createPost(request,userName,password);
     }
 
-    @GetMapping("/getbyId")
-    public PostResponse getPost (@RequestParam Long postId){
-        return postService.getPostbyId(postId);
-    }
+    @GetMapping("/getAllPostsOfUser")
+    public ResponseEntity<List<String>> getPostsByUserId(@RequestParam String  userName) {
 
-    @GetMapping("/all")
-    public List<Post> getPost (){
-        return postService.getAllPost();
+        return postService.getPostsByUserId(userName);
     }
 
     @PutMapping("/update")
-    public PostResponse updatePost(  @RequestParam String userName,
+    public BlogResponse updatePost(  @RequestParam String userName,
                                      @RequestParam String password ,
                                      @RequestParam Long postId,
                                      @RequestParam String postTitle) throws NoSuchAlgorithmException {

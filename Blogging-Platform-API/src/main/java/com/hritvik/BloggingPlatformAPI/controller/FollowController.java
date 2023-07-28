@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 @RestController
 @RequestMapping("api/follow")
@@ -26,19 +27,19 @@ public class FollowController {
  }
 
  @GetMapping("/followings")
-    public FollowResponse getAllFollowings(@RequestParam String userName,
+    public List<String> getAllFollowings(@RequestParam String userName,
                            @RequestParam String password ) throws NoSuchAlgorithmException {
     return followService.getAllFollowings(userName,password);
  }
 
     @GetMapping("/followers")
-    public FollowResponse getAllFollowers(@RequestParam String userName,
-                                           @RequestParam String password ) throws NoSuchAlgorithmException {
+    public List<String> getAllFollowers(@RequestParam String userName,
+                                        @RequestParam String password ) throws NoSuchAlgorithmException {
       return  followService.getAllFollowers(userName,password);
     }
 
     @DeleteMapping("/unfollow")
-    public BlogResponse deleteFollow(@RequestParam String userName,
+    public BlogResponse  deleteFollow(@RequestParam String userName,
                                      @RequestParam String password ,
                                      @RequestParam Long followId) throws NoSuchAlgorithmException {
     return followService.deleteFollow(userName,password, followId);

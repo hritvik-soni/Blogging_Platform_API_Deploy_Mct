@@ -40,6 +40,7 @@ public class UserRequest {
     @Column(name = "phone_number")
     @Pattern(regexp = "\\+\\d{2}-\\d{10}", message = "Phone number must be in the format +91-xxxxxxxxxx")
     private String phoneNumber;
+
     @Column(name = "password")
     @Size(min = 6, max = 20, message = "Password must be between 6 and 20 characters")
     private String password;

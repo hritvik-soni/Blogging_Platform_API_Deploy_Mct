@@ -7,9 +7,11 @@ import com.hritvik.BloggingPlatformAPI.repository.ICommentRepository;
 import com.hritvik.BloggingPlatformAPI.repository.IPostRepository;
 import com.hritvik.BloggingPlatformAPI.repository.IUserRepository;
 import com.hritvik.BloggingPlatformAPI.service.utility.AccountUtils;
+import com.hritvik.BloggingPlatformAPI.service.utility.PasswordEncrypter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,8 +69,11 @@ public class CommentService {
         Long userId = existingUser.getUserId();
 
 
-        if(existingUser== null){
+        if(userId==null){
             return List.of("Invalid User");
+        }
+        if(postRepository.findById(postId).orElse(null)==null){
+            return List.of("Invalid Post Id");
         }
 
         List<String> commentBodies = new ArrayList<>();
@@ -84,9 +89,52 @@ public class CommentService {
             if (commentBodies.isEmpty()) {
                 return List.of("No Comments on this Post");
             }
-
+            return commentBodies;
         }
-        return commentBodies;
+        return List.of("Invalid Credentials!!!!!!!!!!");
+
     }
 
+    boolean authorizeCommentRemover(String email,Comment comment)
+    {
+        String  commentOwnerEmail = comment.getUser().getEmail();
+        String  postOwnerEmail  = comment.getPost().getUser().getEmail();
+
+        return postOwnerEmail.equals(email) || commentOwnerEmail.equals(email);
+    }
+    public BlogResponse deleteComment(String userName, String password, Long commentId) throws NoSuchAlgorithmException {
+
+        User user = userRepository.findByUserName(userName);
+        Comment comment = commentRepository.findById(commentId).orElse(null);
+
+        if(user== null){
+            return BlogResponse.builder()
+                    .responseCode(AccountUtils.ACCOUNT_NOT_EXIST_CODE)
+                    .responseMessage(AccountUtils.ACCOUNT_NOT_EXIST_MESSAGE)
+                    .build();
+        }
+        if(comment == null){
+            return BlogResponse.builder()
+                    .responseCode("020")
+                    .responseMessage("Comment Doesn't Not Exist")
+                    .build();
+        }
+        String encryptedPassword = PasswordEncrypter.encryptPassword(password);
+
+        if(encryptedPassword.equals(user.getPassword())) {
+
+            if (authorizeCommentRemover(user.getEmail(), comment)) {
+                    commentRepository.delete(comment);
+                   return BlogResponse.builder()
+                            .responseCode("021")
+                            .responseMessage("Your Comment Deleted Successfully")
+                            .build();
+              }
+            }
+
+        return BlogResponse.builder()
+                .responseCode(AccountUtils.ACCOUNT_INVALID_CREDENTIALS_CODE)
+                .responseMessage(AccountUtils.ACCOUNT_INVALID_CREDENTIALS_MESSAGE)
+                .build();
+    }
 }

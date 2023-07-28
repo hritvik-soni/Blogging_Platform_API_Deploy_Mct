@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 @RestController
@@ -26,5 +27,13 @@ public class CommentController {
     public List<String> allComments(@PathVariable String userName,
                                     @PathVariable Long postId) {
         return commentService.getComments(userName, postId);
+    }
+
+    @DeleteMapping("/delete")
+    public BlogResponse deleteComment(@RequestParam String userName ,
+                                   @RequestParam String password ,
+                                   @RequestParam  Long commentId) throws NoSuchAlgorithmException {
+
+        return  commentService.deleteComment(userName,password,commentId);
     }
 }
